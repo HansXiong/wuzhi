@@ -28,6 +28,7 @@
       --radius:20px;
     }
     *{box-sizing:border-box}
+    [hidden]{display:none !important}
     body,.card,.asset-row,.setting-card,.bottom-nav,.ghost-btn,.primary-btn,.logo,.pill,.rank,.bar,.icon{
       transition:background-color .2s ease,color .2s ease,border-color .2s ease,box-shadow .2s ease;
     }
@@ -691,9 +692,6 @@
               <button class="action-btn danger" onclick="clearAllAssets()">
                 <strong>清空全部资产</strong><small>保留分类与设置，删除所有资产</small>
               </button>
-              <button class="action-btn" onclick="resetDemoData()">
-                <strong>恢复示例数据</strong><small>仅用于当前网页原型演示</small>
-              </button>
             </div>
             <input id="csvImportInput" type="file" accept=".csv,text/csv" hidden onchange="importCsv(event)" />
             <input id="backupImportInput" type="file" accept=".json,application/json" hidden onchange="importBackup(event)" />
@@ -717,7 +715,7 @@
               </div>
             </div>
             <div class="about-list">
-              <div class="about-row"><span>版本</span><span>PWA v1.6.3</span></div>
+              <div class="about-row"><span>版本</span><span>PWA v1.6.4</span></div>
               <div class="about-row"><span>数据存储</span><span>IndexedDB 本地数据库</span></div>
               <div class="about-row"><span>离线使用</span><span>首次加载完成后可离线打开</span></div>
               <div class="about-row"><span>核心指标</span><span>总资产 · 持有时间 · 日均成本</span></div>
@@ -813,12 +811,35 @@ function esc(str){
 
 let categories = ['数码','生活','厨具','交通','家电','摄影','房产','其他'];
 
-const DEFAULT_CATEGORIES = ['数码','生活','厨具','交通','家电','摄影','房产','其他'];
 const LEGACY_STORAGE_KEY = 'wuzhi-prototype-v3';
 const DB_NAME = 'wuzhi-db';
 const DB_VERSION = 1;
 const DB_STORE = 'appState';
 const DB_STATE_KEY = 'main';
+const PRELOADED_ASSET_SIGNATURE = [
+  '1|iPhone 18 Pro Max 2TB|21999|2025-09-25|数码|荒漠钛金色，256g太小直接上顶配|📱',
+  '2|宝马 330i M运动套装|336800|2024-03-08|交通|矿石白，选装了M运动套件和抬头显示|🚗',
+  '3|浦东新区住宅（90㎡）|4200000|2022-06-18|房产|2022年高点入手，首付+公积金贷款|🏠',
+  '4|MacBook Pro 16 M4 Pro|19999|2024-11-20|数码|24G内存+512G，主力生产力工具|💻',
+  '5|Sony WH-1000XM6|2699|2025-07-15|数码|降噪效果比上一代提升明显|🎧',
+  '6|Herman Miller Aeron|12800|2023-10-01|生活|B档，已换腰靠，坐了两年腰不疼了|🪑',
+  '7|戴森 V15 Detect|4990|2024-01-28|生活|双十一价格，激光检测灰尘真好用|🧹',
+  '8|DJI Mini 4 Pro（畅飞套装）|6888|2024-05-20|数码|周末出行拍航拍素材用|🚁',
+  '9|Trek Émonda SL6|16800|2023-07-04|交通|105变速，公路骑行主力车|🚲',
+  '10|德龙 La Specialista|5490|2024-09-11|厨具|半自动意式，每天早晚各一杯|☕',
+  '11|Kindle Scribe 64G|2999|2025-02-14|数码|情人节礼物，主要用来批注PDF|📖',
+  '12|Switch 2|2799|2025-06-05|数码|首发购入，配了Pro手柄|🎮'
+].join('\n');
+
+function isPreloadedAssetSet(items){
+  if(!Array.isArray(items) || items.length !== 12) return false;
+  const signature = items
+    .slice()
+    .sort((a,b)=>Number(a.id) - Number(b.id))
+    .map(asset=>`${asset.id}|${asset.name}|${asset.price}|${asset.purchaseDate}|${asset.category}|${asset.note || ''}|${asset.icon || ''}`)
+    .join('\n');
+  return signature === PRELOADED_ASSET_SIGNATURE;
+}
 
 let settings = {
   decimals: 2,
@@ -826,22 +847,7 @@ let settings = {
   theme: 'system'
 };
 
-let assets = [
-  {id:1,  name:'iPhone 18 Pro Max 2TB',   price:21999.00, purchaseDate:'2025-09-25', category:'数码', note:'荒漠钛金色，256g太小直接上顶配', icon:'📱'},
-  {id:2,  name:'宝马 330i M运动套装',      price:336800.00, purchaseDate:'2024-03-08', category:'交通', note:'矿石白，选装了M运动套件和抬头显示', icon:'🚗'},
-  {id:3,  name:'浦东新区住宅（90㎡）',     price:4200000.00, purchaseDate:'2022-06-18', category:'房产', note:'2022年高点入手，首付+公积金贷款', icon:'🏠'},
-  {id:4,  name:'MacBook Pro 16 M4 Pro',   price:19999.00, purchaseDate:'2024-11-20', category:'数码', note:'24G内存+512G，主力生产力工具', icon:'💻'},
-  {id:5,  name:'Sony WH-1000XM6',         price:2699.00,  purchaseDate:'2025-07-15', category:'数码', note:'降噪效果比上一代提升明显', icon:'🎧'},
-  {id:6,  name:'Herman Miller Aeron',     price:12800.00, purchaseDate:'2023-10-01', category:'生活', note:'B档，已换腰靠，坐了两年腰不疼了', icon:'🪑'},
-  {id:7,  name:'戴森 V15 Detect',         price:4990.00,  purchaseDate:'2024-01-28', category:'生活', note:'双十一价格，激光检测灰尘真好用', icon:'🧹'},
-  {id:8,  name:'DJI Mini 4 Pro（畅飞套装）',price:6888.00, purchaseDate:'2024-05-20', category:'数码', note:'周末出行拍航拍素材用', icon:'🚁'},
-  {id:9,  name:'Trek Émonda SL6',         price:16800.00, purchaseDate:'2023-07-04', category:'交通', note:'105变速，公路骑行主力车', icon:'🚲'},
-  {id:10, name:'德龙 La Specialista',     price:5490.00,  purchaseDate:'2024-09-11', category:'厨具', note:'半自动意式，每天早晚各一杯', icon:'☕'},
-  {id:11, name:'Kindle Scribe 64G',       price:2999.00,  purchaseDate:'2025-02-14', category:'数码', note:'情人节礼物，主要用来批注PDF', icon:'📖'},
-  {id:12, name:'Switch 2',               price:2799.00,  purchaseDate:'2025-06-05', category:'数码', note:'首发购入，配了Pro手柄', icon:'🎮'}
-];
-
-const DEFAULT_ASSETS = JSON.parse(JSON.stringify(assets));
+let assets = [];
 const VALID_SORTS = new Set(['dailyAsc','dailyDesc','dateDesc','dateAsc','priceDesc','priceAsc','nameAsc']);
 const VALID_THEMES = new Set(['system','light','dark']);
 
@@ -922,15 +928,16 @@ async function loadState(){
     if(!state) return;
     if(Array.isArray(state.assets)) assets = state.assets;
     if(Array.isArray(state.categories) && state.categories.length) categories = state.categories;
-    // 如果本地数据库中存的是最初的 13 条旧假数据（以 z5soft座椅 开头），自动平滑升级为新版示例数据
-    if(assets.length === 13 && assets[0]?.name === 'z5soft座椅'){
-      assets = JSON.parse(JSON.stringify(DEFAULT_ASSETS));
-      categories = [...DEFAULT_CATEGORIES];
-      await writeIndexedState({assets, categories, settings});
-    }
     if(state.settings && typeof state.settings === 'object'){
       settings = {...settings, ...state.settings};
       delete settings.currency;
+      delete settings.isDemoData;
+      delete settings.hasSeenDemoNotice;
+      delete settings.isDemoNoticeDismissed;
+    }
+    if(isPreloadedAssetSet(assets) || (assets.length === 13 && assets[0]?.name === 'z5soft座椅')){
+      assets = [];
+      await writeIndexedState({assets, categories, settings});
     }
   }catch(e){
     console.warn('无法读取 IndexedDB 本地数据', e);
@@ -1570,7 +1577,6 @@ function normalizeBackupData(data){
     if(!VALID_THEMES.has(backupSettings.theme)) throw new Error('备份中的主题设置无效');
     normalizedSettings.theme = backupSettings.theme;
   }
-
   return {
     assets: normalizedAssets,
     categories: normalizedCategories.sort((a,b)=>a.localeCompare(b,'zh-CN')),
@@ -1622,22 +1628,6 @@ function clearAllAssets(){
     }
   });
 }
-function resetDemoData(){
-  showConfirm({
-    title:'恢复示例数据',
-    message:'恢复示例数据会覆盖当前网页原型中的资产、分类与设置。',
-    okText:'恢复',
-    onConfirm:() => {
-      assets = JSON.parse(JSON.stringify(DEFAULT_ASSETS));
-      categories = [...DEFAULT_CATEGORIES];
-      settings = {decimals:2, defaultSort:'dailyAsc', theme:'system'};
-      applyTheme();
-      renderAll();
-      toast('已恢复示例数据');
-    }
-  });
-}
-
 
 let deferredInstallPrompt = null;
 
