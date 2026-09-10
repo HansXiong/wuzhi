@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wuzhi-pwa-v1.6';
+const CACHE_NAME = 'wuzhi-pwa-v1';
 const APP_SHELL = [
   './',
   './index.html',
