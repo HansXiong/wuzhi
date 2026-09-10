@@ -361,8 +361,8 @@
       --line:#2a2a2a;
       --accent:#f5f5f5;
       --accent-soft:#242424;
-      --danger:#ff8e8e;
-      --danger-soft:#2b1717;
+      --danger:#c0c0c0;
+      --danger-soft:#1e1e1e;
       --shadow:0 10px 30px rgba(0,0,0,.45);
       background:#000000;
     }
@@ -448,8 +448,8 @@
       border-color:#333333;
     }
     body[data-theme="dark"] .action-btn.danger{
-      background:#160d0d;
-      border-color:#482626;
+      background:#141414;
+      border-color:#333333;
     }
     .m-label { display: none; }
     @media (max-width:960px){
@@ -645,7 +645,9 @@
                 <option value="dailyAsc">日均成本低 → 高</option>
                 <option value="dailyDesc">日均成本高 → 低</option>
                 <option value="dateDesc">购买日期新 → 旧</option>
+                <option value="dateAsc">购买日期旧 → 新</option>
                 <option value="priceDesc">价格高 → 低</option>
+                <option value="priceAsc">价格低 → 高</option>
                 <option value="nameAsc">名称</option>
               </select>
             </div>
@@ -705,7 +707,7 @@
               </div>
             </div>
             <div class="about-list">
-              <div class="about-row"><span>版本</span><span>PWA v1.5</span></div>
+              <div class="about-row"><span>版本</span><span>PWA v1.6</span></div>
               <div class="about-row"><span>数据存储</span><span>IndexedDB 本地数据库</span></div>
               <div class="about-row"><span>离线使用</span><span>首次加载完成后可离线打开</span></div>
               <div class="about-row"><span>核心指标</span><span>总资产 · 持有时间 · 日均成本</span></div>
@@ -722,12 +724,13 @@
     <button class="nav-btn" data-page="settings" onclick="switchPage('settings',this)">⚙ 设置</button>
   </nav>
 
-  <div class="modal" id="modal" onclick="closeOnBackdrop(event)">
+  <div class="modal" id="modal">
     <div class="dialog">
       <div class="dialog-head">
-        <h3>添加资产</h3>
+        <h3 id="modalTitle">添加资产</h3>
         <button class="icon-btn" onclick="closeModal()">✕</button>
       </div>
+      <input type="hidden" id="editingAssetId" value="" />
       <div class="form-grid">
         <div class="field full">
           <label>资产名称 *</label>
@@ -739,7 +742,7 @@
         </div>
         <div class="field">
           <label>购买日期 *</label>
-          <input id="assetDateInput" type="date" value="2026-09-10" />
+          <input id="assetDateInput" type="date" />
         </div>
         <div class="field full">
           <label>分类</label>
@@ -754,12 +757,15 @@
         </div>
         <div class="field full">
           <label>备注</label>
-          <textarea id="assetNoteInput" rows="4" placeholder="可选"></textarea>
+          <textarea id="assetNoteInput" rows="3" placeholder="可选"></textarea>
         </div>
       </div>
-      <div class="dialog-actions">
-        <button class="ghost-btn" style="display:inline-block" onclick="closeModal()">取消</button>
-        <button class="primary-btn" onclick="saveAsset()">保存</button>
+      <div class="dialog-actions" style="justify-content:space-between">
+        <button class="danger-btn" id="modalDeleteBtn" style="display:none;padding:10px 14px;font-size:13px;border-radius:12px" onclick="deleteAssetFromModal()">删除资产</button>
+        <div style="display:flex;gap:10px;margin-left:auto">
+          <button class="ghost-btn" style="display:inline-block" onclick="closeModal()">取消</button>
+          <button class="primary-btn" id="modalSaveBtn" onclick="saveAsset()">保存</button>
+        </div>
       </div>
     </div>
   </div>
@@ -782,11 +788,22 @@
   <div class="toast" id="toast"></div>
 
 <script>
-const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+// 每次调用动态取当天，避免 PWA 后台跨天时日期过期
+function getToday(){ const d = new Date(); d.setHours(0,0,0,0); return d; }
 
-let categories = ['数码','生活','厨具','交通','家电','摄影','其他'];
+// 防 XSS：对插入 innerHTML 的用户内容转义
+function esc(str){
+  return String(str ?? '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
 
-const DEFAULT_CATEGORIES = ['数码','生活','厨具','交通','家电','摄影','其他'];
+let categories = ['数码','生活','厨具','交通','家电','摄影','房产','其他'];
+
+const DEFAULT_CATEGORIES = ['数码','生活','厨具','交通','家电','摄影','房产','其他'];
 const LEGACY_STORAGE_KEY = 'wuzhi-prototype-v3';
 const DB_NAME = 'wuzhi-db';
 const DB_VERSION = 1;
@@ -800,19 +817,18 @@ let settings = {
 };
 
 let assets = [
-  {id:1, name:'z5soft座椅', price:311.78, purchaseDate:'2024-06-09', category:'生活', note:'', icon:'🪑'},
-  {id:2, name:'烧水壶（家里）', price:119.00, purchaseDate:'2025-10-15', category:'厨具', note:'', icon:'🫖'},
-  {id:3, name:'徕芬牙刷2', price:161.80, purchaseDate:'2025-06-13', category:'生活', note:'', icon:'🪥'},
-  {id:4, name:'小米电热水杯', price:135.00, purchaseDate:'2025-03-29', category:'厨具', note:'', icon:'🥤'},
-  {id:5, name:'vivo tws3', price:232.00, purchaseDate:'2023-07-29', category:'数码', note:'', icon:'🎧'},
-  {id:6, name:'kindle558', price:129.00, purchaseDate:'2024-04-11', category:'数码', note:'', icon:'📖'},
-  {id:7, name:'行车记录仪', price:73.00, purchaseDate:'2025-04-17', category:'交通', note:'', icon:'🚗'},
-  {id:8, name:'飞智冰原狼手柄', price:130.00, purchaseDate:'2023-07-17', category:'数码', note:'', icon:'🎮'},
-  {id:9, name:'VGN N75键盘', price:120.00, purchaseDate:'2023-06-17', category:'数码', note:'', icon:'⌨️'},
-  {id:10, name:'尼康tw2d', price:70.00, purchaseDate:'2024-10-06', category:'数码', note:'', icon:'📷'},
-  {id:11, name:'酷态科充电宝', price:74.00, purchaseDate:'2024-08-11', category:'数码', note:'', icon:'🔋'},
-  {id:12, name:'小米吸尘器', price:65.00, purchaseDate:'2023-11-26', category:'生活', note:'', icon:'🧹'},
-  {id:13, name:'电吹风', price:24.00, purchaseDate:'2025-03-01', category:'生活', note:'', icon:'💨'}
+  {id:1,  name:'iPhone 18 Pro Max 2TB',   price:21999.00, purchaseDate:'2025-09-25', category:'数码', note:'荒漠钛金色，256g太小直接上顶配', icon:'📱'},
+  {id:2,  name:'宝马 330i M运动套装',      price:336800.00, purchaseDate:'2024-03-08', category:'交通', note:'矿石白，选装了M运动套件和抬头显示', icon:'🚗'},
+  {id:3,  name:'浦东新区住宅（90㎡）',     price:4200000.00, purchaseDate:'2022-06-18', category:'房产', note:'2022年高点入手，首付+公积金贷款', icon:'🏠'},
+  {id:4,  name:'MacBook Pro 16 M4 Pro',   price:19999.00, purchaseDate:'2024-11-20', category:'数码', note:'24G内存+512G，主力生产力工具', icon:'💻'},
+  {id:5,  name:'Sony WH-1000XM6',         price:2699.00,  purchaseDate:'2025-07-15', category:'数码', note:'降噪效果比上一代提升明显', icon:'🎧'},
+  {id:6,  name:'Herman Miller Aeron',     price:12800.00, purchaseDate:'2023-10-01', category:'生活', note:'B档，已换腰靠，坐了两年腰不疼了', icon:'🪑'},
+  {id:7,  name:'戴森 V15 Detect',         price:4990.00,  purchaseDate:'2024-01-28', category:'生活', note:'双十一价格，激光检测灰尘真好用', icon:'🧹'},
+  {id:8,  name:'DJI Mini 4 Pro（畅飞套装）',price:6888.00, purchaseDate:'2024-05-20', category:'数码', note:'周末出行拍航拍素材用', icon:'🚁'},
+  {id:9,  name:'Trek Émonda SL6',         price:16800.00, purchaseDate:'2023-07-04', category:'交通', note:'105变速，公路骑行主力车', icon:'🚲'},
+  {id:10, name:'德龙 La Specialista',     price:5490.00,  purchaseDate:'2024-09-11', category:'厨具', note:'半自动意式，每天早晚各一杯', icon:'☕'},
+  {id:11, name:'Kindle Scribe 64G',       price:2999.00,  purchaseDate:'2025-02-14', category:'数码', note:'情人节礼物，主要用来批注PDF', icon:'📖'},
+  {id:12, name:'Switch 2',               price:2799.00,  purchaseDate:'2025-06-05', category:'数码', note:'首发购入，配了Pro手柄', icon:'🎮'}
 ];
 
 const DEFAULT_ASSETS = JSON.parse(JSON.stringify(assets));
@@ -839,6 +855,8 @@ async function readIndexedState(){
     request.onsuccess = () => resolve(request.result?.value || null);
     request.onerror = () => reject(request.error);
     tx.oncomplete = () => db.close();
+    tx.onerror = () => { db.close(); };
+    tx.onabort = () => { db.close(); };
   });
 }
 async function writeIndexedState(value){
@@ -884,6 +902,7 @@ async function saveState(){
     await writeIndexedState({assets, categories, settings});
   }catch(e){
     console.warn('无法保存 IndexedDB 本地数据', e);
+    toast('⚠️ 数据保存失败，请检查存储空间');
   }
 }
 async function requestPersistentStorage(){
@@ -937,8 +956,9 @@ function applyTheme(){
 
 
 function daysUsed(asset){
+  const today = getToday();
   const start = new Date(asset.purchaseDate + 'T00:00:00');
-  const diff = Math.floor((TODAY - start) / (1000 * 60 * 60 * 24));
+  const diff = Math.floor((today - start) / (1000 * 60 * 60 * 24));
   return Math.max(diff, 1);
 }
 function dailyCost(asset){
@@ -954,16 +974,18 @@ function formatDailyCost(n){
   return '¥' + Number(n).toFixed(settings.decimals);
 }
 function formatHolding(dateString){
+  const today = getToday();
   const start = new Date(dateString + 'T00:00:00');
-  let years = TODAY.getFullYear() - start.getFullYear();
-  let months = TODAY.getMonth() - start.getMonth();
-  if (TODAY.getDate() < start.getDate()) months -= 1;
-  if (months < 0) {
-    years -= 1;
-    months += 12;
-  }
+  const totalDays = Math.floor((today - start) / (1000 * 60 * 60 * 24));
+  if(totalDays < 0) return '0天';
+  if(totalDays < 31) return `${totalDays}天`;
+  let years = today.getFullYear() - start.getFullYear();
+  let months = today.getMonth() - start.getMonth();
+  if(today.getDate() < start.getDate()) months -= 1;
+  if(months < 0){ years -= 1; months += 12; }
   years = Math.max(0, years);
   months = Math.max(0, months);
+  if(years === 0) return `${months}个月`;
   return `${years}年${months}个月`;
 }
 function averageHoldingYears(){
@@ -1022,7 +1044,7 @@ function renderCategoryStats(){
 
   container.innerHTML = entries.map(([name, value]) => `
     <div class="category-row">
-      <span>${name}</span>
+      <span>${esc(name)}</span>
       <div class="bar"><i style="width:${Math.max(8, (value / maxValue) * 100)}%"></i></div>
       <span class="money">${formatMoney(value)}</span>
     </div>
@@ -1039,7 +1061,7 @@ function renderRankingList(targetId, data, directionText){
       <div class="value-left">
         <div class="rank">${idx + 1}</div>
         <div>
-          <strong>${a.name}</strong>
+          <strong>${esc(a.name)}</strong>
           <small>已使用 ${formatHolding(a.purchaseDate)}</small>
         </div>
       </div>
@@ -1090,16 +1112,16 @@ function renderAssets(){
 
   container.innerHTML = list.map(a => `
     <div class="asset-row">
-      <div class="a-icon"><div class="icon">${a.icon || guessIcon(a.category)}</div></div>
+      <div class="a-icon"><div class="icon">${esc(a.icon || guessIcon(a.category))}</div></div>
       <div class="a-main">
-        <div class="asset-name">${a.name}</div>
-        <div class="asset-meta">${a.purchaseDate}</div>
+        <div class="asset-name">${esc(a.name)}</div>
+        <div class="asset-meta">${esc(a.purchaseDate)}${a.note ? ` · <span style="color:var(--muted)">${esc(a.note)}</span>` : ''}</div>
       </div>
       <div class="a-price cost"><span class="m-label">总价: </span>${formatMoney(a.price)}</div>
       <div class="a-hold"><span class="m-label">持有: </span>${formatHolding(a.purchaseDate)}</div>
       <div class="a-daily cost"><span class="m-label">日均: </span>${formatDailyCost(dailyCost(a))}</div>
-      <div class="a-cat"><span class="pill">${a.category}</span></div>
-      <div class="a-action"><button class="danger-btn" onclick="deleteAsset(${a.id})">删除</button></div>
+      <div class="a-cat"><span class="pill">${esc(a.category)}</span></div>
+      <div class="a-action"><button class="ghost-btn" style="padding:7px 12px;font-size:12px" onclick="openEditModal(${a.id})">编辑</button></div>
     </div>
   `).join('');
 }
@@ -1134,6 +1156,11 @@ function goToAssetsAndOpenModal(){
   openModal();
 }
 function openModal(){
+  const dateInput = document.getElementById('assetDateInput');
+  if(dateInput && !dateInput.value){
+    const t = getToday();
+    dateInput.value = `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
+  }
   document.getElementById('modal').classList.add('show');
 }
 function closeModal(){
@@ -1170,28 +1197,26 @@ function saveAsset(){
   const purchaseDate = document.getElementById('assetDateInput').value;
   const category = document.getElementById('assetCategorySelect').value || '其他';
   const note = (document.getElementById('assetNoteInput').value || '').trim();
+  const editingId = document.getElementById('editingAssetId').value;
 
-  if (!name){
-    alert('请填写资产名称');
-    return;
-  }
-  if (!price || price <= 0){
-    alert('请填写正确的购买价格');
-    return;
-  }
-  if (!purchaseDate){
-    alert('请填写购买日期');
-    return;
-  }
-  if (!categories.includes(category)){
-    categories.push(category);
-    refreshCategorySelects();
-  }
+  if (!name){ alert('请填写资产名称'); return; }
+  if (!price || price <= 0){ alert('请填写正确的购买价格'); return; }
+  if (!purchaseDate){ alert('请填写购买日期'); return; }
+  if (!categories.includes(category)){ categories.push(category); refreshCategorySelects(); }
 
-  const id = assets.length ? Math.max(...assets.map(a => a.id)) + 1 : 1;
-  assets.push({
-    id, name, price, purchaseDate, category, note, icon: guessIcon(category)
-  });
+  if(editingId){
+    // 编辑模式：更新现有资产
+    const idx = assets.findIndex(a => a.id === Number(editingId));
+    if(idx !== -1){
+      assets[idx] = { ...assets[idx], name, price, purchaseDate, category, note, icon: guessIcon(category) };
+    }
+    toast('资产已更新');
+  } else {
+    // 新增模式
+    const id = assets.length ? Math.max(...assets.map(a => a.id)) + 1 : 1;
+    assets.push({ id, name, price, purchaseDate, category, note, icon: guessIcon(category) });
+    toast('资产已添加');
+  }
 
   closeModal();
   clearModal();
@@ -1199,12 +1224,50 @@ function saveAsset(){
   renderAll();
 }
 function clearModal(){
+  const t = getToday();
+  const todayStr = `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
   document.getElementById('assetNameInput').value = '';
   document.getElementById('assetPriceInput').value = '';
-  document.getElementById('assetDateInput').value = '2026-09-10';
+  document.getElementById('assetDateInput').value = todayStr;
   document.getElementById('assetNoteInput').value = '';
   document.getElementById('newCategoryInput').value = '';
   document.getElementById('newCategoryBox').style.display = 'none';
+  document.getElementById('editingAssetId').value = '';
+  document.getElementById('modalTitle').textContent = '添加资产';
+  document.getElementById('modalSaveBtn').textContent = '保存';
+  document.getElementById('modalDeleteBtn').style.display = 'none';
+}
+function openEditModal(id){
+  const asset = assets.find(a => a.id === id);
+  if(!asset) return;
+  refreshCategorySelects();
+  document.getElementById('assetNameInput').value = asset.name;
+  document.getElementById('assetPriceInput').value = asset.price;
+  document.getElementById('assetDateInput').value = asset.purchaseDate;
+  document.getElementById('assetNoteInput').value = asset.note || '';
+  document.getElementById('assetCategorySelect').value = asset.category;
+  document.getElementById('editingAssetId').value = asset.id;
+  document.getElementById('modalTitle').textContent = '编辑资产';
+  document.getElementById('modalSaveBtn').textContent = '保存修改';
+  document.getElementById('modalDeleteBtn').style.display = 'inline-flex';
+  document.getElementById('modal').classList.add('show');
+}
+function deleteAssetFromModal(){
+  const editingId = Number(document.getElementById('editingAssetId').value);
+  const found = assets.find(a => a.id === editingId);
+  if(!found) return;
+  closeModal();
+  clearModal();
+  showConfirm({
+    title: '删除资产',
+    message: `确定删除"${found.name}"吗？删除后资产数量、总金额和排行榜都会立即更新。`,
+    okText: '删除',
+    onConfirm: () => {
+      assets = assets.filter(a => a.id !== editingId);
+      renderAll();
+      toast('资产已删除');
+    }
+  });
 }
 
 function renderCategoryManager(){
@@ -1216,7 +1279,7 @@ function renderCategoryManager(){
     return `
       <div class="category-chip">
         <div class="category-chip-main">
-          <strong>${category}</strong>
+          <strong>${esc(category)}</strong>
           <small>${count} 件资产${protectedCategory ? ' · 默认分类' : ''}</small>
         </div>
         ${protectedCategory
@@ -1346,8 +1409,10 @@ function importCsv(event){
       if(rows.length < 2) throw new Error('CSV 无有效数据');
       const header = rows[0].map(x=>x.trim());
       const idx = key => header.indexOf(key);
-      const nameIdx = idx('name'), dateIdx = idx('purchaseDate'), priceIdx = idx('purchasePrice'), catIdx = idx('category'), noteIdx = idx('note');
-      if(nameIdx < 0 || dateIdx < 0 || priceIdx < 0) throw new Error('CSV 缺少必要字段');
+      const nameIdx = idx('name'), dateIdx = idx('purchaseDate');
+      const priceIdx = idx('purchasePrice') >= 0 ? idx('purchasePrice') : idx('price');
+      const catIdx = idx('category'), noteIdx = idx('note');
+      if(nameIdx < 0 || dateIdx < 0 || priceIdx < 0) throw new Error('CSV 缺少必要字段（需要 name、purchaseDate、price 或 purchasePrice）');
 
       let nextId = assets.length ? Math.max(...assets.map(a=>a.id)) + 1 : 1;
       let added = 0;
