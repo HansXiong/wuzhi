@@ -451,7 +451,7 @@
       background:#160d0d;
       border-color:#482626;
     }
-
+    .m-label { display: none; }
     @media (max-width:960px){
       .stats-grid{grid-template-columns:1fr}
       .hero-grid{grid-template-columns:1fr 1fr}
@@ -459,9 +459,25 @@
     }
     @media (max-width:840px){
       .settings-grid{grid-template-columns:1fr}
-      .asset-row{grid-template-columns:42px 1.5fr 100px 110px}
-      .asset-row > :nth-child(5),.asset-row > :nth-child(6),.asset-row > :nth-child(7){display:none}
       .asset-row.header{display:none}
+      .asset-row {
+        grid-template-columns: 42px 1fr auto;
+        row-gap: 12px;
+        column-gap: 12px;
+        align-items: center;
+      }
+      .a-icon { grid-column: 1; grid-row: 1 / 4; align-self: start; margin-top: 4px; }
+      .a-main { grid-column: 2; grid-row: 1; }
+      .a-price { grid-column: 3; grid-row: 1; text-align: right; }
+      
+      .a-daily { grid-column: 2; grid-row: 2; }
+      .a-hold { grid-column: 3; grid-row: 2; text-align: right; font-size: 13px; color: var(--muted); }
+      
+      .a-cat { grid-column: 2; grid-row: 3; }
+      .a-action { grid-column: 3; grid-row: 3; text-align: right; }
+      
+      .m-label { display: inline; font-size: 12px; color: var(--muted); font-weight: normal; margin-right: 4px; }
+      .a-price .m-label { display: none; }
     }
     @media (max-width:560px){
       .summary-pair{
@@ -475,8 +491,6 @@
       .ghost-btn{display:none}
       .hero-grid{grid-template-columns:1fr}
       .metric-value{font-size:26px}
-      .asset-row{grid-template-columns:40px 1fr 88px}
-      .asset-row > :nth-child(4){display:none}
       .form-grid{grid-template-columns:1fr}
       .field.full{grid-column:auto}
       .category-inline,.new-category-box{grid-template-columns:1fr}
@@ -1076,16 +1090,16 @@ function renderAssets(){
 
   container.innerHTML = list.map(a => `
     <div class="asset-row">
-      <div class="icon">${a.icon || guessIcon(a.category)}</div>
-      <div>
+      <div class="a-icon"><div class="icon">${a.icon || guessIcon(a.category)}</div></div>
+      <div class="a-main">
         <div class="asset-name">${a.name}</div>
         <div class="asset-meta">${a.purchaseDate}</div>
       </div>
-      <div class="cost">${formatMoney(a.price)}</div>
-      <div>${formatHolding(a.purchaseDate)}</div>
-      <div class="cost">${formatDailyCost(dailyCost(a))}</div>
-      <div><span class="pill">${a.category}</span></div>
-      <div><button class="danger-btn" onclick="deleteAsset(${a.id})">删除</button></div>
+      <div class="a-price cost"><span class="m-label">总价: </span>${formatMoney(a.price)}</div>
+      <div class="a-hold"><span class="m-label">持有: </span>${formatHolding(a.purchaseDate)}</div>
+      <div class="a-daily cost"><span class="m-label">日均: </span>${formatDailyCost(dailyCost(a))}</div>
+      <div class="a-cat"><span class="pill">${a.category}</span></div>
+      <div class="a-action"><button class="danger-btn" onclick="deleteAsset(${a.id})">删除</button></div>
     </div>
   `).join('');
 }
