@@ -713,7 +713,7 @@
               </div>
             </div>
             <div class="about-list">
-              <div class="about-row"><span>版本</span><span>PWA v1.6.1</span></div>
+              <div class="about-row"><span>版本</span><span>PWA v1.6.2</span></div>
               <div class="about-row"><span>数据存储</span><span>IndexedDB 本地数据库</span></div>
               <div class="about-row"><span>离线使用</span><span>首次加载完成后可离线打开</span></div>
               <div class="about-row"><span>核心指标</span><span>总资产 · 持有时间 · 日均成本</span></div>
@@ -838,6 +838,29 @@ let assets = [
 ];
 
 const DEFAULT_ASSETS = JSON.parse(JSON.stringify(assets));
+const VALID_SORTS = new Set(['dailyAsc','dailyDesc','dateDesc','dateAsc','priceDesc','priceAsc','nameAsc']);
+const VALID_THEMES = new Set(['system','light','dark']);
+
+function isValidDateString(value){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(value + 'T00:00:00');
+  if(!Number.isFinite(date.getTime())) return false;
+  const [year, month, day] = value.split('-').map(Number);
+  return date.getFullYear() === year && date.getMonth() + 1 === month && date.getDate() === day;
+}
+function validateAssetFields({name, price, purchaseDate, category}){
+  if(!name) return '资产名称不能为空';
+  if(!Number.isFinite(price) || price <= 0) return '购买价格必须是正数';
+  if(!isValidDateString(purchaseDate)) return '购买日期无效';
+  if(!category) return '分类不能为空';
+  return '';
+}
+function getNextAssetId(){
+  const ids = assets
+    .map(asset => Number(asset.id))
+    .filter(id => Number.isSafeInteger(id) && id > 0);
+  return (ids.length ? Math.max(...ids) : 0) + 1;
+}
 
 function openWuzhiDb(){
   return new Promise((resolve, reject) => {
@@ -1022,11 +1045,27 @@ function refreshCategorySelects(){
   const oldModal = modalSelect?.value || '';
 
   if(filter){
-    filter.innerHTML = '<option value="">全部分类</option>' + categories.map(c => `<option value="${c}">${c}</option>`).join('');
+    filter.replaceChildren();
+    const allOption = document.createElement('option');
+    allOption.value = '';
+    allOption.textContent = '全部分类';
+    filter.append(allOption);
+    categories.forEach(category => {
+      const option = document.createElement('option');
+      option.value = category;
+      option.textContent = category;
+      filter.append(option);
+    });
     if(categories.includes(oldFilter)) filter.value = oldFilter;
   }
   if(modalSelect){
-    modalSelect.innerHTML = categories.map(c => `<option value="${c}">${c}</option>`).join('');
+    modalSelect.replaceChildren();
+    categories.forEach(category => {
+      const option = document.createElement('option');
+      option.value = category;
+      option.textContent = category;
+      modalSelect.append(option);
+    });
     modalSelect.value = categories.includes(oldModal) ? oldModal : (categories[0] || '其他');
   }
 }
@@ -1133,7 +1172,7 @@ function renderAssets(){
       <div class="a-hold"><span class="m-label">持有: </span>${formatHolding(a.purchaseDate)}</div>
       <div class="a-daily cost"><span class="m-label">日均: </span>${formatDailyCost(dailyCost(a))}</div>
       <div class="a-cat"><span class="pill">${esc(a.category)}</span></div>
-      <div class="a-action"><button class="ghost-btn" style="padding:7px 12px;font-size:12px" onclick="openEditModal(${a.id})">编辑</button></div>
+      <div class="a-action"><button class="ghost-btn" style="padding:7px 12px;font-size:12px" data-asset-id="${Number(a.id)}">编辑</button></div>
     </div>
   `).join('');
 }
@@ -1168,6 +1207,8 @@ function goToAssetsAndOpenModal(){
   openModal();
 }
 function openModal(){
+  clearModal();
+  refreshCategorySelects();
   const dateInput = document.getElementById('assetDateInput');
   if(dateInput && !dateInput.value){
     const t = getToday();
@@ -1211,9 +1252,11 @@ function saveAsset(){
   const note = (document.getElementById('assetNoteInput').value || '').trim();
   const editingId = document.getElementById('editingAssetId').value;
 
-  if (!name){ alert('请填写资产名称'); return; }
-  if (!price || price <= 0){ alert('请填写正确的购买价格'); return; }
-  if (!purchaseDate){ alert('请填写购买日期'); return; }
+  const validationError = validateAssetFields({name, price, purchaseDate, category});
+  if(validationError){
+    alert(validationError);
+    return;
+  }
   if (!categories.includes(category)){ categories.push(category); refreshCategorySelects(); }
 
   if(editingId){
@@ -1225,7 +1268,7 @@ function saveAsset(){
     toast('资产已更新');
   } else {
     // 新增模式
-    const id = assets.length ? Math.max(...assets.map(a => a.id)) + 1 : 1;
+    const id = getNextAssetId();
     assets.push({ id, name, price, purchaseDate, category, note, icon: guessIcon(category) });
     toast('资产已添加');
   }
@@ -1244,6 +1287,7 @@ function clearModal(){
   document.getElementById('assetNoteInput').value = '';
   document.getElementById('newCategoryInput').value = '';
   document.getElementById('newCategoryBox').style.display = 'none';
+  document.getElementById('assetCategorySelect').value = '其他';
   document.getElementById('editingAssetId').value = '';
   document.getElementById('modalTitle').textContent = '添加资产';
   document.getElementById('modalSaveBtn').textContent = '保存';
@@ -1296,7 +1340,7 @@ function renderCategoryManager(){
         </div>
         ${protectedCategory
           ? '<button class="category-delete" disabled style="opacity:.3;cursor:not-allowed" title="默认分类不能删除">×</button>'
-          : `<button class="category-delete" onclick="deleteCategory('${category.replace(/'/g, "\\'")}')" title="删除分类">×</button>`}
+          : `<button class="category-delete" data-category="${esc(category)}" title="删除分类">×</button>`}
       </div>
     `;
   }).join('');
@@ -1426,21 +1470,27 @@ function importCsv(event){
       const catIdx = idx('category'), noteIdx = idx('note');
       if(nameIdx < 0 || dateIdx < 0 || priceIdx < 0) throw new Error('CSV 缺少必要字段（需要 name、purchaseDate、price 或 purchasePrice）');
 
-      let nextId = assets.length ? Math.max(...assets.map(a=>a.id)) + 1 : 1;
+      let nextId = getNextAssetId();
       let added = 0;
-      rows.slice(1).forEach(r => {
+      const errors = [];
+      rows.slice(1).forEach((r, rowIndex) => {
         const name = (r[nameIdx] || '').trim();
         const date = (r[dateIdx] || '').trim();
         const price = Number(r[priceIdx]);
         const category = ((catIdx >= 0 ? r[catIdx] : '') || '其他').trim() || '其他';
-        if(!name || !date || !Number.isFinite(price) || price <= 0) return;
+        const validationError = validateAssetFields({name, price, purchaseDate:date, category});
+        if(validationError){
+          errors.push(`第 ${rowIndex + 2} 行：${validationError}`);
+          return;
+        }
         if(!categories.includes(category)) categories.push(category);
         assets.push({id:nextId++, name, price, purchaseDate:date, category, note:noteIdx>=0 ? (r[noteIdx]||'') : '', icon:guessIcon(category)});
         added++;
       });
       categories = [...new Set(categories)].sort((a,b)=>a.localeCompare(b,'zh-CN'));
       renderAll();
-      toast(`已导入 ${added} 件资产`);
+      toast(errors.length ? `已导入 ${added} 件，跳过 ${errors.length} 行` : `已导入 ${added} 件资产`);
+      if(errors.length) console.warn('CSV 导入跳过的行：', errors);
     }catch(e){
       alert('CSV 导入失败：' + e.message);
     }finally{
@@ -1461,6 +1511,68 @@ function exportBackup(){
   downloadText('物值_完整备份.json', JSON.stringify(backup,null,2), 'application/json;charset=utf-8');
   toast('完整备份已导出');
 }
+function normalizeBackupData(data){
+  if(!data || !Array.isArray(data.assets) || !Array.isArray(data.categories)){
+    throw new Error('不是有效的物值备份');
+  }
+
+  const normalizedCategories = [...new Set(
+    data.categories.map(category => String(category ?? '').trim()).filter(Boolean)
+  )];
+  if(!normalizedCategories.includes('其他')) normalizedCategories.push('其他');
+
+  const usedIds = new Set();
+  let nextId = 1;
+  const normalizedAssets = data.assets.map((raw, index) => {
+    const name = String(raw?.name ?? '').trim();
+    const price = Number(raw?.price);
+    const purchaseDate = String(raw?.purchaseDate ?? '').trim();
+    const category = String(raw?.category ?? '其他').trim() || '其他';
+    const validationError = validateAssetFields({name, price, purchaseDate, category});
+    if(validationError) throw new Error(`第 ${index + 1} 件资产：${validationError}`);
+    if(!normalizedCategories.includes(category)) normalizedCategories.push(category);
+
+    let id = Number(raw?.id);
+    if(!Number.isSafeInteger(id) || id <= 0 || usedIds.has(id)){
+      while(usedIds.has(nextId)) nextId++;
+      id = nextId;
+    }
+    usedIds.add(id);
+    nextId = Math.max(nextId, id + 1);
+
+    return {
+      id,
+      name,
+      price,
+      purchaseDate,
+      category,
+      note: String(raw?.note ?? '').trim(),
+      icon: guessIcon(category)
+    };
+  });
+
+  const backupSettings = data.settings && typeof data.settings === 'object' ? data.settings : {};
+  const normalizedSettings = {...settings};
+  if(backupSettings.decimals !== undefined){
+    const decimals = Number(backupSettings.decimals);
+    if(![1,2,3].includes(decimals)) throw new Error('备份中的小数位设置无效');
+    normalizedSettings.decimals = decimals;
+  }
+  if(backupSettings.defaultSort !== undefined){
+    if(!VALID_SORTS.has(backupSettings.defaultSort)) throw new Error('备份中的默认排序设置无效');
+    normalizedSettings.defaultSort = backupSettings.defaultSort;
+  }
+  if(backupSettings.theme !== undefined){
+    if(!VALID_THEMES.has(backupSettings.theme)) throw new Error('备份中的主题设置无效');
+    normalizedSettings.theme = backupSettings.theme;
+  }
+
+  return {
+    assets: normalizedAssets,
+    categories: normalizedCategories.sort((a,b)=>a.localeCompare(b,'zh-CN')),
+    settings: normalizedSettings
+  };
+}
 function importBackup(event){
   const file = event.target.files?.[0];
   if(!file) return;
@@ -1468,16 +1580,15 @@ function importBackup(event){
   reader.onload = () => {
     try{
       const data = JSON.parse(reader.result);
-      if(!Array.isArray(data.assets) || !Array.isArray(data.categories)) throw new Error('不是有效的物值备份');
+      const normalized = normalizeBackupData(data);
       showConfirm({
         title:'恢复完整备份',
-        message:`备份中包含 ${data.assets.length} 件资产。恢复后将覆盖当前资产、分类和设置。`,
+        message:`备份中包含 ${normalized.assets.length} 件资产。恢复后将覆盖当前资产、分类和设置。`,
         okText:'恢复备份',
         onConfirm:() => {
-          assets = data.assets;
-          categories = data.categories.includes('其他') ? data.categories : [...data.categories,'其他'];
-          settings = {...settings, ...(data.settings || {})};
-          delete settings.currency;
+          assets = normalized.assets;
+          categories = normalized.categories;
+          settings = normalized.settings;
           applyTheme();
           renderAll();
           toast('备份已恢复');
@@ -1569,6 +1680,21 @@ async function registerServiceWorker(){
   }
 }
 
+function bindDynamicEvents(){
+  document.getElementById('assetContainer')?.addEventListener('click', event => {
+    const button = event.target.closest('[data-asset-id]');
+    if(!button) return;
+    const id = Number(button.dataset.assetId);
+    if(Number.isSafeInteger(id) && id > 0) openEditModal(id);
+  });
+
+  document.getElementById('categoryManager')?.addEventListener('click', event => {
+    const button = event.target.closest('[data-category]');
+    if(!button) return;
+    deleteCategory(button.dataset.category);
+  });
+}
+
 function renderAll(){
   refreshCategorySelects();
   renderDashboard();
@@ -1584,6 +1710,7 @@ async function initializeApp(){
   const initialSort = document.getElementById('sortSelect');
   if(initialSort) initialSort.value = settings.defaultSort;
 
+  bindDynamicEvents();
   renderAll();
   await registerServiceWorker();
   await requestPersistentStorage();
