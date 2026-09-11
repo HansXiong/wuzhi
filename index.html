@@ -546,7 +546,7 @@
           </div>
 
           <div class="card">
-            <div class="metric-label">日均成本</div>
+            <div class="metric-label">全部资产日均成本</div>
             <div class="metric-value" id="averageDailyCost">¥0.00</div>
           </div>
         </div>
@@ -1039,9 +1039,9 @@ function averageHoldingYears(){
   const avgDays = assets.reduce((sum, a) => sum + daysUsed(a), 0) / assets.length;
   return avgDays / 365;
 }
-function averageDailyCost(){
+function totalDailyCost(){
   if (!assets.length) return 0;
-  return assets.reduce((sum, a) => sum + dailyCost(a), 0) / assets.length;
+  return assets.reduce((sum, a) => sum + dailyCost(a), 0);
 }
 function guessIcon(category){
   const map = {
@@ -1084,7 +1084,7 @@ function renderDashboard(){
   document.getElementById('totalAmount').textContent = formatMoney(totalAmount());
   document.getElementById('avgHolding').textContent = averageHoldingYears().toFixed(1) + ' 年';
   document.getElementById('assetCount').textContent = `${assets.length}件`;
-  document.getElementById('averageDailyCost').textContent = formatDailyCost(averageDailyCost());
+  document.getElementById('averageDailyCost').textContent = formatDailyCost(totalDailyCost());
   document.getElementById('assetPageCount').textContent = `${assets.length} 件`;
 
   renderCategoryStats();
