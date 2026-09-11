@@ -1,0 +1,28 @@
+{
+  "dependencies": {
+    "@capacitor/android": "^8.5.1",
+    "@capacitor/core": "^8.5.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.5.1"
+  },
+  "name": "wuzhi-app",
+  "version": "1.0.0",
+  "description": "一个轻量、离线优先的个人资产管理 PWA。",
+  "main": "sw.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HansXiong/wuzhi.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/HansXiong/wuzhi/issues"
+  },
+  "homepage": "https://github.com/HansXiong/wuzhi#readme"
+}

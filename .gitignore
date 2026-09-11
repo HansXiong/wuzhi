@@ -1,0 +1,18 @@
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+
+# Android Studio and Gradle generated files
+android/.gradle/
+android/.idea/
+android/**/build/
+android/app/release/
+android/local.properties
+
+# Build outputs
+*.apk
+*.aab
+
+# Signing keys and secrets
+*.jks
+*.keystore
