@@ -29,7 +29,7 @@
     }
     *{box-sizing:border-box}
     [hidden]{display:none !important}
-    body,.card,.asset-row,.setting-card,.bottom-nav,.ghost-btn,.primary-btn,.logo,.pill,.rank,.bar,.icon{
+    body,.card,.asset-row,.setting-card,.bottom-nav,.ghost-btn,.primary-btn,.logo,.pill,.rank,.bar{
       transition:background-color .2s ease,color .2s ease,border-color .2s ease,box-shadow .2s ease;
     }
     body{
@@ -129,17 +129,13 @@
     .money{text-align:right;font-variant-numeric:tabular-nums}
     .asset-list{display:flex;flex-direction:column;gap:10px}
     .asset-row{
-      grid-template-columns:34px 42px minmax(150px,1.8fr) 130px 150px 110px 84px 88px;
+      grid-template-columns:34px minmax(150px,1.8fr) 130px 150px 110px 84px 88px;
       padding:14px 16px;border:1px solid var(--line);border-radius:16px;background:#fff;
       transition:.18s ease;
     }
     .asset-row:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(24,34,29,.06)}
     .asset-row.header{
       background:transparent;border:0;padding:4px 16px;color:var(--muted);font-size:12px
-    }
-    .icon{
-      width:38px;height:38px;border-radius:12px;background:var(--surface-2);
-      display:grid;place-items:center;font-size:18px
     }
     .asset-index{
       color:var(--muted);font-size:13px;text-align:center;font-variant-numeric:tabular-nums
@@ -220,35 +216,6 @@
     }
     .new-category-box{
       display:flex;gap:8px;align-items:center;margin-top:8px
-    }
-    .icon-select-row{display:flex;align-items:center;gap:10px}
-    .icon-current{
-      width:44px;height:44px;border-radius:13px;background:var(--surface-2);
-      display:grid;place-items:center;font-size:22px;flex:0 0 auto
-    }
-    .icon-select-copy{min-width:0;flex:1}
-    .icon-select-copy strong{display:block;font-size:13px}
-    .icon-select-copy small{display:block;margin-top:3px;color:var(--muted);font-size:12px}
-    .icon-picker{
-      margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:14px;
-      background:var(--surface-2)
-    }
-    .icon-default-btn{
-      width:100%;border:1px solid var(--line);background:var(--surface);color:var(--text);
-      border-radius:10px;padding:9px 10px;text-align:left;cursor:pointer;font:inherit;font-size:12px
-    }
-    .icon-picker-group + .icon-picker-group{margin-top:12px}
-    .icon-picker-group-title{font-size:12px;font-weight:800;color:var(--muted);margin-bottom:7px}
-    .icon-picker-options{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
-    .icon-option{
-      border:1px solid transparent;background:var(--surface);color:var(--text);border-radius:10px;
-      min-height:54px;padding:5px 3px;cursor:pointer;font:inherit;text-align:center;min-width:0
-    }
-    .icon-option:hover,.icon-option.active{border-color:var(--accent);background:var(--accent-soft)}
-    .icon-option-emoji{display:block;font-size:21px;line-height:1.1}
-    .icon-option-label{
-      display:block;margin-top:3px;font-size:10px;color:var(--muted);white-space:nowrap;
-      overflow:hidden;text-overflow:ellipsis
     }
     .dialog-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
     .muted{color:var(--muted)}
@@ -493,20 +460,12 @@
     body[data-theme="dark"] .bar > i{
       background:linear-gradient(90deg,#777777,#f0f0f0);
     }
-    body[data-theme="dark"] .icon{
-      background:#1c1c1c;
-    }
     body[data-theme="dark"] .icon-btn,
-    body[data-theme="dark"] .mini-btn,
-    body[data-theme="dark"] .icon-default-btn,
-    body[data-theme="dark"] .icon-option{
+    body[data-theme="dark"] .mini-btn{
       background:#181818;
       color:#f5f5f5;
       border-color:#333333;
     }
-    body[data-theme="dark"] .icon-picker{background:#141414;border-color:#333333}
-    body[data-theme="dark"] .icon-option:hover,
-    body[data-theme="dark"] .icon-option.active{background:#242424;border-color:#f5f5f5}
     body[data-theme="dark"] .action-btn.danger{
       background:#141414;
       border-color:#333333;
@@ -521,26 +480,24 @@
       .settings-grid{grid-template-columns:1fr}
       .asset-row.header{display:none}
       .asset-row {
-        grid-template-columns: 26px 34px minmax(0, 1fr) auto;
+        grid-template-columns: 26px minmax(0, 1fr) auto;
         row-gap: 6px;
         column-gap: 8px;
         padding: 10px 12px;
         align-items: center;
       }
       .asset-index { grid-column: 1; grid-row: 1 / 4; align-self: start; padding-top: 8px; }
-      .a-icon { grid-column: 2; grid-row: 1 / 4; align-self: start; margin-top: 2px; }
-      .a-icon .icon { width: 34px; height: 34px; border-radius: 10px; font-size: 16px; }
-      .a-main { grid-column: 3; grid-row: 1; min-width: 0; }
+      .a-main { grid-column: 2; grid-row: 1; min-width: 0; }
       .a-main .asset-name { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
       .a-main .asset-meta { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-      .a-price { grid-column: 4; grid-row: 1; text-align: right; }
+      .a-price { grid-column: 3; grid-row: 1; text-align: right; }
       
-      .a-daily { grid-column: 3; grid-row: 2; }
-      .a-hold { grid-column: 4; grid-row: 2; text-align: right; font-size: 13px; color: var(--muted); }
+      .a-daily { grid-column: 2; grid-row: 2; }
+      .a-hold { grid-column: 3; grid-row: 2; text-align: right; font-size: 13px; color: var(--muted); }
       
-      .a-cat { grid-column: 3; grid-row: 3; min-width: 0; }
+      .a-cat { grid-column: 2; grid-row: 3; min-width: 0; }
       .a-action {
-        grid-column: 4;
+        grid-column: 3;
         grid-row: 3;
         display: flex;
         justify-content: flex-end;
@@ -565,8 +522,6 @@
       .form-grid{grid-template-columns:1fr}
       .field.full{grid-column:auto}
       .category-inline,.new-category-box{grid-template-columns:1fr}
-      .icon-select-row{align-items:flex-start}
-      .icon-picker-options{grid-template-columns:repeat(5,minmax(0,1fr))}
       .category-manager-grid,.action-grid,.data-overview{grid-template-columns:1fr}
       .setting-row{align-items:flex-start;flex-direction:column}
       .setting-row select{width:100%}
@@ -660,7 +615,7 @@
 
         <div class="asset-list">
           <div class="asset-row header">
-            <div>序号</div><div></div><div>资产</div><div>购入价格</div><div>持有时间</div><div>日均成本</div><div>分类</div><div>操作</div>
+            <div>序号</div><div>资产</div><div>购入价格</div><div>持有时间</div><div>日均成本</div><div>分类</div><div>操作</div>
           </div>
           <div id="assetContainer"></div>
         </div>
@@ -814,27 +769,12 @@
         <div class="field full">
           <label>分类</label>
           <div class="category-inline">
-            <select id="assetCategorySelect" onchange="updateIconPreview()"></select>
+            <select id="assetCategorySelect"></select>
             <button class="mini-btn" type="button" onclick="toggleNewCategory()">＋ 新增分类</button>
           </div>
           <div class="new-category-box" id="newCategoryBox" style="display:none">
             <input id="newCategoryInput" placeholder="输入新的分类名称" />
             <button class="mini-btn" type="button" onclick="addCustomCategory()">添加到分类</button>
-          </div>
-        </div>
-        <div class="field full">
-          <label>图标</label>
-          <div class="icon-select-row">
-            <div class="icon-current" id="selectedIconPreview">📦</div>
-            <div class="icon-select-copy">
-              <strong id="selectedIconLabel">跟随分类默认</strong>
-              <small>可以选择更适合这件资产的图标</small>
-            </div>
-            <button class="mini-btn" type="button" onclick="toggleIconPicker()">选择图标</button>
-          </div>
-          <div class="icon-picker" id="iconPicker" hidden>
-            <button class="icon-default-btn" type="button" onclick="useCategoryIcon()">↻ 跟随分类默认</button>
-            <div id="iconPickerGrid"></div>
           </div>
         </div>
         <div class="field full">
@@ -902,52 +842,6 @@ function esc(str){
 }
 
 const DEFAULT_CATEGORIES = ['数码产品','生活运动','衣物鞋包','家具电器','交通出行','其他'];
-const ICON_OPTIONS = [
-  {key:'smartphone', label:'手机', emoji:'📱', group:'数码'},
-  {key:'laptop', label:'电脑', emoji:'💻', group:'数码'},
-  {key:'tablet', label:'平板', emoji:'📲', group:'数码'},
-  {key:'camera', label:'相机', emoji:'📷', group:'数码'},
-  {key:'headphones', label:'耳机', emoji:'🎧', group:'数码'},
-  {key:'gamepad', label:'游戏机', emoji:'🎮', group:'数码'},
-  {key:'monitor', label:'显示器', emoji:'🖥️', group:'数码'},
-  {key:'smartwatch', label:'手表', emoji:'⌚', group:'数码'},
-  {key:'running', label:'跑步', emoji:'🏃', group:'生活运动'},
-  {key:'dumbbell', label:'哑铃', emoji:'🏋️', group:'生活运动'},
-  {key:'bicycle', label:'自行车', emoji:'🚲', group:'生活运动'},
-  {key:'ball', label:'球类', emoji:'⚽', group:'生活运动'},
-  {key:'backpack', label:'背包', emoji:'🎒', group:'生活运动'},
-  {key:'tent', label:'露营', emoji:'⛺', group:'生活运动'},
-  {key:'shirt', label:'衣服', emoji:'👕', group:'衣物鞋包'},
-  {key:'shoe', label:'鞋子', emoji:'👟', group:'衣物鞋包'},
-  {key:'handbag', label:'手提包', emoji:'👜', group:'衣物鞋包'},
-  {key:'glasses', label:'眼镜', emoji:'👓', group:'衣物鞋包'},
-  {key:'hat', label:'帽子', emoji:'🧢', group:'衣物鞋包'},
-  {key:'sofa', label:'沙发', emoji:'🛋️', group:'家具电器'},
-  {key:'bed', label:'床', emoji:'🛏️', group:'家具电器'},
-  {key:'fridge', label:'冰箱', emoji:'🧊', group:'家具电器'},
-  {key:'washer', label:'洗衣机', emoji:'🧺', group:'家具电器'},
-  {key:'vacuum', label:'吸尘器', emoji:'🧹', group:'家具电器'},
-  {key:'lamp', label:'台灯', emoji:'💡', group:'家具电器'},
-  {key:'pot', label:'厨具', emoji:'🍳', group:'家具电器'},
-  {key:'car', label:'汽车', emoji:'🚗', group:'交通出行'},
-  {key:'motorcycle', label:'摩托车', emoji:'🏍️', group:'交通出行'},
-  {key:'scooter', label:'滑板车', emoji:'🛴', group:'交通出行'},
-  {key:'airplane', label:'飞机', emoji:'✈️', group:'交通出行'},
-  {key:'train', label:'火车', emoji:'🚆', group:'交通出行'},
-  {key:'bus', label:'公交', emoji:'🚌', group:'交通出行'},
-  {key:'book', label:'书籍', emoji:'📚', group:'其他'},
-  {key:'tool', label:'工具', emoji:'🛠️', group:'其他'},
-  {key:'key', label:'钥匙', emoji:'🔑', group:'其他'},
-  {key:'gift', label:'礼物', emoji:'🎁', group:'其他'},
-  {key:'jewelry', label:'饰品', emoji:'💎', group:'其他'},
-  {key:'document', label:'文件', emoji:'📄', group:'其他'},
-  {key:'box', label:'收纳箱', emoji:'📦', group:'其他'}
-];
-const ICON_BY_KEY = Object.fromEntries(ICON_OPTIONS.map(icon => [icon.key, icon]));
-const CATEGORY_ICON_KEYS = {
-  '数码产品':'smartphone','生活运动':'running','衣物鞋包':'shirt',
-  '家具电器':'sofa','交通出行':'car','其他':'box'
-};
 const CATEGORY_MIGRATIONS = [
   {
     categories:['数码','生活','厨具','交通','家电','摄影','房产','其他'],
@@ -968,7 +862,6 @@ const CATEGORY_MIGRATIONS = [
 ];
 
 let categories = [...DEFAULT_CATEGORIES];
-let selectedIconKey = '';
 
 function findCategoryMigration(values){
   const unique = [...new Set(values)];
@@ -1106,7 +999,7 @@ async function loadState(){
         categories = [...DEFAULT_CATEGORIES];
         assets = assets.map(asset => {
           const category = categoryMigration.map[asset.category] || asset.category;
-          return setAssetCategory(asset, category);
+          return {...asset, category, icon:guessIcon(category)};
         });
         stateChanged = true;
       }else{
@@ -1227,91 +1120,11 @@ function totalDailyCost(){
 }
 function guessIcon(category){
   const map = {
-    '数码产品':'📱','生活运动':'🏃','衣物鞋包':'👕','家具电器':'🛋️',
+    '数码产品':'📱','生活运动':'🏃','衣物鞋包':'👕','家具电器':'🏠',
     '交通出行':'🚗','其他':'📦',
     '数码':'📱','生活':'🧺','厨具':'🍽️','交通':'🚗','家电':'🔌','摄影':'📷','房产':'🏠'
   };
   return map[category] || '📦';
-}
-function guessIconKey(category){
-  return CATEGORY_ICON_KEYS[category] || 'box';
-}
-function getIconEmoji(key, category){
-  return ICON_BY_KEY[key]?.emoji
-    || ICON_BY_KEY[guessIconKey(category)]?.emoji
-    || guessIcon(category);
-}
-function getAssetIcon(asset){
-  if(asset?.iconKey && ICON_BY_KEY[asset.iconKey]) return ICON_BY_KEY[asset.iconKey].emoji;
-  return asset?.icon || getIconEmoji('', asset?.category);
-}
-function setAssetCategory(asset, category){
-  const next = {...asset, category};
-  if(next.iconKey && ICON_BY_KEY[next.iconKey]){
-    next.icon = ICON_BY_KEY[next.iconKey].emoji;
-  }else{
-    delete next.iconKey;
-    next.icon = guessIcon(category);
-  }
-  return next;
-}
-function getSelectedIconFields(category){
-  const option = ICON_BY_KEY[selectedIconKey];
-  return option ? {iconKey:option.key, icon:option.emoji} : {icon:getIconEmoji('', category)};
-}
-function renderIconPicker(){
-  const grid = document.getElementById('iconPickerGrid');
-  if(!grid) return;
-  const groups = [...new Set(ICON_OPTIONS.map(icon => icon.group))];
-  grid.innerHTML = groups.map(group => {
-    const options = ICON_OPTIONS.filter(icon => icon.group === group).map(icon => `
-      <button class="icon-option${selectedIconKey === icon.key ? ' active' : ''}"
-        type="button" data-icon-key="${esc(icon.key)}" aria-label="${esc(icon.label)}"
-        aria-pressed="${selectedIconKey === icon.key ? 'true' : 'false'}">
-        <span class="icon-option-emoji">${icon.emoji}</span>
-        <span class="icon-option-label">${esc(icon.label)}</span>
-      </button>
-    `).join('');
-    return `<div class="icon-picker-group">
-      <div class="icon-picker-group-title">${esc(group)}</div>
-      <div class="icon-picker-options">${options}</div>
-    </div>`;
-  }).join('');
-}
-function updateIconPreview(){
-  const category = document.getElementById('assetCategorySelect')?.value || '其他';
-  const option = ICON_BY_KEY[selectedIconKey];
-  const preview = document.getElementById('selectedIconPreview');
-  const label = document.getElementById('selectedIconLabel');
-  if(preview) preview.textContent = option?.emoji || getIconEmoji('', category);
-  if(label) label.textContent = option?.label || '跟随分类默认';
-  document.querySelectorAll('#iconPickerGrid [data-icon-key]').forEach(button => {
-    const active = button.dataset.iconKey === selectedIconKey;
-    button.classList.toggle('active', active);
-    button.setAttribute('aria-pressed', active ? 'true' : 'false');
-  });
-}
-function toggleIconPicker(){
-  const picker = document.getElementById('iconPicker');
-  if(!picker) return;
-  if(picker.hidden){
-    renderIconPicker();
-    picker.hidden = false;
-  }else{
-    picker.hidden = true;
-  }
-}
-function selectAssetIcon(key){
-  selectedIconKey = ICON_BY_KEY[key] ? key : '';
-  updateIconPreview();
-  const picker = document.getElementById('iconPicker');
-  if(picker) picker.hidden = true;
-}
-function useCategoryIcon(){
-  selectedIconKey = '';
-  updateIconPreview();
-  const picker = document.getElementById('iconPicker');
-  if(picker) picker.hidden = true;
 }
 function refreshCategorySelects(){
   const filter = document.getElementById('categoryFilter');
@@ -1439,7 +1252,6 @@ function renderAssets(){
   container.innerHTML = list.map((a, index) => `
     <div class="asset-row">
       <div class="asset-index">${index + 1}</div>
-      <div class="a-icon"><div class="icon">${esc(getAssetIcon(a))}</div></div>
       <div class="a-main">
         <div class="asset-name">${esc(a.name)}</div>
         <div class="asset-meta">${esc(a.purchaseDate)}${a.note ? ` · <span style="color:var(--muted)">${esc(a.note)}</span>` : ''}</div>
@@ -1485,8 +1297,6 @@ function goToAssetsAndOpenModal(){
 function openModal(){
   clearModal();
   refreshCategorySelects();
-  selectedIconKey = '';
-  updateIconPreview();
   const dateInput = document.getElementById('assetDateInput');
   if(dateInput && !dateInput.value){
     const t = getToday();
@@ -1518,7 +1328,6 @@ function addCustomCategory(){
     saveState();
   }
   document.getElementById('assetCategorySelect').value = value;
-  updateIconPreview();
   input.value = '';
   document.getElementById('newCategoryBox').style.display = 'none';
 }
@@ -1536,20 +1345,18 @@ function saveAsset(){
     return;
   }
   if (!categories.includes(category)){ categories.push(category); refreshCategorySelects(); }
-  const iconFields = getSelectedIconFields(category);
 
   if(editingId){
     // 编辑模式：更新现有资产
     const idx = assets.findIndex(a => a.id === Number(editingId));
     if(idx !== -1){
-      assets[idx] = { ...assets[idx], name, price, purchaseDate, category, note, ...iconFields };
-      if(!iconFields.iconKey) delete assets[idx].iconKey;
+      assets[idx] = { ...assets[idx], name, price, purchaseDate, category, note, icon: guessIcon(category) };
     }
     toast('资产已更新');
   } else {
     // 新增模式
     const id = getNextAssetId();
-    assets.push({ id, name, price, purchaseDate, category, note, ...iconFields });
+    assets.push({ id, name, price, purchaseDate, category, note, icon: guessIcon(category) });
     toast('资产已添加');
   }
 
@@ -1568,10 +1375,6 @@ function clearModal(){
   document.getElementById('newCategoryInput').value = '';
   document.getElementById('newCategoryBox').style.display = 'none';
   document.getElementById('assetCategorySelect').value = '其他';
-  selectedIconKey = '';
-  const iconPicker = document.getElementById('iconPicker');
-  if(iconPicker) iconPicker.hidden = true;
-  updateIconPreview();
   document.getElementById('editingAssetId').value = '';
   document.getElementById('modalTitle').textContent = '添加资产';
   document.getElementById('modalSaveBtn').textContent = '保存';
@@ -1586,10 +1389,6 @@ function openEditModal(id){
   document.getElementById('assetDateInput').value = asset.purchaseDate;
   document.getElementById('assetNoteInput').value = asset.note || '';
   document.getElementById('assetCategorySelect').value = asset.category;
-  selectedIconKey = ICON_BY_KEY[asset.iconKey] ? asset.iconKey : '';
-  updateIconPreview();
-  const iconPicker = document.getElementById('iconPicker');
-  if(iconPicker) iconPicker.hidden = true;
   document.getElementById('editingAssetId').value = asset.id;
   document.getElementById('modalTitle').textContent = '编辑资产';
   document.getElementById('modalSaveBtn').textContent = '保存修改';
@@ -1686,7 +1485,7 @@ function deleteCategory(category){
     onConfirm:() => {
       if(fallbackCategory){
         assets = assets.map(a => a.category === category
-          ? setAssetCategory(a, fallbackCategory)
+          ? {...a, category:fallbackCategory, icon:guessIcon(fallbackCategory)}
           : a);
       }
       categories = categories.filter(c => c !== category);
@@ -1870,9 +1669,6 @@ function normalizeBackupData(data){
     usedIds.add(id);
     nextId = Math.max(nextId, id + 1);
 
-    const iconKey = typeof raw?.iconKey === 'string' && ICON_BY_KEY[raw.iconKey]
-      ? raw.iconKey
-      : '';
     return {
       id,
       name,
@@ -1880,9 +1676,7 @@ function normalizeBackupData(data){
       purchaseDate,
       category,
       note: String(raw?.note ?? '').trim(),
-      ...(iconKey
-        ? {iconKey, icon:ICON_BY_KEY[iconKey].emoji}
-        : {icon:guessIcon(category)})
+      icon: guessIcon(category)
     };
   });
 
@@ -2015,12 +1809,6 @@ function bindDynamicEvents(){
     const button = event.target.closest('[data-category]');
     if(!button) return;
     deleteCategory(button.dataset.category);
-  });
-
-  document.getElementById('iconPickerGrid')?.addEventListener('click', event => {
-    const button = event.target.closest('[data-icon-key]');
-    if(!button) return;
-    selectAssetIcon(button.dataset.iconKey);
   });
 }
 
