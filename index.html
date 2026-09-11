@@ -129,7 +129,7 @@
     .money{text-align:right;font-variant-numeric:tabular-nums}
     .asset-list{display:flex;flex-direction:column;gap:10px}
     .asset-row{
-      grid-template-columns:42px minmax(150px,1.8fr) 130px 150px 110px 84px 88px;
+      grid-template-columns:34px 42px minmax(150px,1.8fr) 130px 150px 110px 84px 88px;
       padding:14px 16px;border:1px solid var(--line);border-radius:16px;background:#fff;
       transition:.18s ease;
     }
@@ -140,6 +140,9 @@
     .icon{
       width:38px;height:38px;border-radius:12px;background:var(--surface-2);
       display:grid;place-items:center;font-size:18px
+    }
+    .asset-index{
+      color:var(--muted);font-size:13px;text-align:center;font-variant-numeric:tabular-nums
     }
     .asset-name{font-weight:700}
     .asset-meta{font-size:12px;color:var(--muted);margin-top:3px}
@@ -226,6 +229,21 @@
 
     .setting-card.full{grid-column:1/-1}
 
+    .category-summary-card .setting-head{
+      display:flex;align-items:center;justify-content:space-between;gap:14px;
+      margin-bottom:0;padding-bottom:0;border-bottom:0
+    }
+    .category-summary-card .setting-head > div{min-width:0}
+    .category-summary-meta{margin:6px 0 0;color:var(--muted);font-size:13px}
+    .category-dialog{max-height:min(720px,calc(100vh - 40px));overflow:auto}
+    .category-dialog-note{margin:14px 0 0;color:var(--muted);font-size:13px;line-height:1.55}
+    .category-group + .category-group{margin-top:18px}
+    .category-group-title{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      font-size:13px;font-weight:800;color:var(--text);margin-bottom:8px
+    }
+    .category-group-title span{font-size:12px;font-weight:500;color:var(--muted)}
+
     .setting-section-title{
       font-size:20px !important;
       font-weight:800;
@@ -283,9 +301,8 @@
       min-width:140px;border:1px solid var(--line);background:#fff;color:var(--text);
       border-radius:11px;padding:9px 10px;font:inherit;outline:none
     }
-    .category-manager{
-      display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:12px
-    }
+    .category-manager{display:block;margin-top:18px}
+    .category-manager-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
     .category-chip{
       display:flex;align-items:center;justify-content:space-between;gap:8px;
       border:1px solid var(--line);background:#f8faf9;border-radius:13px;
@@ -296,11 +313,18 @@
       display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
     }
     .category-chip small{color:var(--muted)}
+    .category-chip-actions{display:flex;align-items:center;gap:3px;flex-shrink:0}
+    .category-move,.category-delete{
+      border:0;background:transparent;color:var(--muted);cursor:pointer;
+      width:28px;height:28px;border-radius:9px;font-size:15px
+    }
+    .category-move:hover{background:var(--accent-soft);color:var(--accent)}
+    .category-move:disabled{opacity:.25;cursor:not-allowed;background:transparent;color:var(--muted)}
     .category-delete{
-      border:0;background:transparent;color:var(--danger);cursor:pointer;
-      width:28px;height:28px;border-radius:9px;font-size:16px
+      color:var(--danger);font-size:16px
     }
     .category-delete:hover{background:var(--danger-soft)}
+    .category-empty{padding:10px 0;color:var(--muted);font-size:13px}
     .settings-add-category{
       display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:12px
     }
@@ -339,6 +363,7 @@
     }
     .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
+    #confirmModal{z-index:60}
     .confirm-dialog{width:min(420px,100%)}
     .confirm-copy{
       color:var(--muted);font-size:14px;line-height:1.7;margin:14px 0 0
@@ -462,25 +487,26 @@
       .settings-grid{grid-template-columns:1fr}
       .asset-row.header{display:none}
       .asset-row {
-        grid-template-columns: 34px minmax(0, 1fr) auto;
+        grid-template-columns: 26px 34px minmax(0, 1fr) auto;
         row-gap: 6px;
         column-gap: 8px;
         padding: 10px 12px;
         align-items: center;
       }
-      .a-icon { grid-column: 1; grid-row: 1 / 4; align-self: start; margin-top: 2px; }
+      .asset-index { grid-column: 1; grid-row: 1 / 4; align-self: start; padding-top: 8px; }
+      .a-icon { grid-column: 2; grid-row: 1 / 4; align-self: start; margin-top: 2px; }
       .a-icon .icon { width: 34px; height: 34px; border-radius: 10px; font-size: 16px; }
-      .a-main { grid-column: 2; grid-row: 1; min-width: 0; }
+      .a-main { grid-column: 3; grid-row: 1; min-width: 0; }
       .a-main .asset-name { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
       .a-main .asset-meta { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-      .a-price { grid-column: 3; grid-row: 1; text-align: right; }
+      .a-price { grid-column: 4; grid-row: 1; text-align: right; }
       
-      .a-daily { grid-column: 2; grid-row: 2; }
-      .a-hold { grid-column: 3; grid-row: 2; text-align: right; font-size: 13px; color: var(--muted); }
+      .a-daily { grid-column: 3; grid-row: 2; }
+      .a-hold { grid-column: 4; grid-row: 2; text-align: right; font-size: 13px; color: var(--muted); }
       
-      .a-cat { grid-column: 2; grid-row: 3; min-width: 0; }
+      .a-cat { grid-column: 3; grid-row: 3; min-width: 0; }
       .a-action {
-        grid-column: 3;
+        grid-column: 4;
         grid-row: 3;
         display: flex;
         justify-content: flex-end;
@@ -505,7 +531,7 @@
       .form-grid{grid-template-columns:1fr}
       .field.full{grid-column:auto}
       .category-inline,.new-category-box{grid-template-columns:1fr}
-      .category-manager,.action-grid,.data-overview{grid-template-columns:1fr}
+      .category-manager-grid,.action-grid,.data-overview{grid-template-columns:1fr}
       .setting-row{align-items:flex-start;flex-direction:column}
       .setting-row select{width:100%}
     }
@@ -598,7 +624,7 @@
 
         <div class="asset-list">
           <div class="asset-row header">
-            <div></div><div>资产</div><div>购入价格</div><div>持有时间</div><div>日均成本</div><div>分类</div><div>操作</div>
+            <div>序号</div><div></div><div>资产</div><div>购入价格</div><div>持有时间</div><div>日均成本</div><div>分类</div><div>操作</div>
           </div>
           <div id="assetContainer"></div>
         </div>
@@ -610,17 +636,14 @@
         </div>
 
         <div class="settings-grid">
-          <div class="setting-card full">
+          <div class="setting-card full category-summary-card">
             <div class="setting-head">
               <div>
-                <h3 class="setting-section-title">分类管理</h3>
+                <h3 class="setting-section-title">分类</h3>
+                <p class="category-summary-meta" id="categorySummary">6 个分类 · 可新增、删除和排序</p>
               </div>
+              <button class="ghost-btn" type="button" onclick="openCategoryManager()">管理分类</button>
             </div>
-            <div class="settings-add-category">
-              <input id="settingsCategoryInput" placeholder="输入新的分类名称" onkeydown="if(event.key==='Enter') addCategoryFromSettings()" />
-              <button class="primary-btn" onclick="addCategoryFromSettings()">＋ 新增分类</button>
-            </div>
-            <div class="category-manager" id="categoryManager"></div>
           </div>
 
           <div class="setting-card">
@@ -793,6 +816,24 @@
     </div>
   </div>
 
+  <div class="modal" id="categoryModal" onclick="if(event.target===this) closeCategoryManager()">
+    <div class="dialog category-dialog">
+      <div class="dialog-head">
+        <h3>管理分类</h3>
+        <button class="icon-btn" type="button" onclick="closeCategoryManager()">✕</button>
+      </div>
+      <p class="category-dialog-note">分类按当前顺序显示。所有分类都可以删除，也可以随时新增和调整顺序。</p>
+      <div class="category-manager" id="categoryManager"></div>
+      <div class="settings-add-category">
+        <input id="settingsCategoryInput" placeholder="输入新的自定义分类" onkeydown="if(event.key==='Enter') addCategoryFromSettings()" />
+        <button class="primary-btn" type="button" onclick="addCategoryFromSettings()">＋ 新增分类</button>
+      </div>
+      <div class="dialog-actions">
+        <button class="ghost-btn" type="button" onclick="closeCategoryManager()">完成</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
 <script>
@@ -809,7 +850,35 @@ function esc(str){
     .replace(/'/g,'&#39;');
 }
 
-let categories = ['数码','生活','厨具','交通','家电','摄影','房产','其他'];
+const DEFAULT_CATEGORIES = ['数码产品','生活运动','衣物鞋包','家具电器','交通出行','其他'];
+const CATEGORY_MIGRATIONS = [
+  {
+    categories:['数码','生活','厨具','交通','家电','摄影','房产','其他'],
+    map:{
+      '数码':'数码产品','摄影':'数码产品','生活':'生活运动',
+      '厨具':'家具电器','家电':'家具电器','房产':'家具电器',
+      '交通':'交通出行','其他':'其他'
+    }
+  },
+  {
+    categories:['数码产品','生活运动','衣物鞋包','家用电器','家居生活','交通出行','其他'],
+    map:{
+      '数码产品':'数码产品','生活运动':'生活运动','衣物鞋包':'衣物鞋包',
+      '家用电器':'家具电器','家居生活':'家具电器',
+      '交通出行':'交通出行','其他':'其他'
+    }
+  }
+];
+
+let categories = [...DEFAULT_CATEGORIES];
+
+function findCategoryMigration(values){
+  const unique = [...new Set(values)];
+  return CATEGORY_MIGRATIONS.find(migration => (
+    unique.length === migration.categories.length
+    && migration.categories.every(category => unique.includes(category))
+  )) || null;
+}
 
 const LEGACY_STORAGE_KEY = 'wuzhi-prototype-v3';
 const DB_NAME = 'wuzhi-db';
@@ -926,8 +995,26 @@ async function loadState(){
     }
 
     if(!state) return;
+    let stateChanged = false;
     if(Array.isArray(state.assets)) assets = state.assets;
-    if(Array.isArray(state.categories) && state.categories.length) categories = state.categories;
+    if(isPreloadedAssetSet(assets) || (assets.length === 13 && assets[0]?.name === 'z5soft座椅')){
+      assets = [];
+      stateChanged = true;
+    }
+    if(Array.isArray(state.categories) && state.categories.length){
+      const storedCategories = [...new Set(state.categories.map(category => String(category ?? '').trim()).filter(Boolean))];
+      const categoryMigration = findCategoryMigration(storedCategories);
+      if(categoryMigration){
+        categories = [...DEFAULT_CATEGORIES];
+        assets = assets.map(asset => {
+          const category = categoryMigration.map[asset.category] || asset.category;
+          return {...asset, category, icon:guessIcon(category)};
+        });
+        stateChanged = true;
+      }else{
+        categories = [...new Set([...DEFAULT_CATEGORIES, ...storedCategories])];
+      }
+    }
     if(state.settings && typeof state.settings === 'object'){
       settings = {...settings, ...state.settings};
       delete settings.currency;
@@ -935,10 +1022,7 @@ async function loadState(){
       delete settings.hasSeenDemoNotice;
       delete settings.isDemoNoticeDismissed;
     }
-    if(isPreloadedAssetSet(assets) || (assets.length === 13 && assets[0]?.name === 'z5soft座椅')){
-      assets = [];
-      await writeIndexedState({assets, categories, settings});
-    }
+    if(stateChanged) await writeIndexedState({assets, categories, settings});
   }catch(e){
     console.warn('无法读取 IndexedDB 本地数据', e);
   }
@@ -1045,7 +1129,9 @@ function totalDailyCost(){
 }
 function guessIcon(category){
   const map = {
-    '数码':'📱','生活':'🧺','厨具':'🍽️','交通':'🚗','家电':'🔌','摄影':'📷','其他':'📦'
+    '数码产品':'📱','生活运动':'🏃','衣物鞋包':'👕','家具电器':'🏠',
+    '交通出行':'🚗','其他':'📦',
+    '数码':'📱','生活':'🧺','厨具':'🍽️','交通':'🚗','家电':'🔌','摄影':'📷','房产':'🏠'
   };
   return map[category] || '📦';
 }
@@ -1172,8 +1258,9 @@ function renderAssets(){
     return;
   }
 
-  container.innerHTML = list.map(a => `
+  container.innerHTML = list.map((a, index) => `
     <div class="asset-row">
+      <div class="asset-index">${index + 1}</div>
       <div class="a-icon"><div class="icon">${esc(a.icon || guessIcon(a.category))}</div></div>
       <div class="a-main">
         <div class="asset-name">${esc(a.name)}</div>
@@ -1246,7 +1333,6 @@ function addCustomCategory(){
   }
   if (!categories.includes(value)){
     categories.push(value);
-    categories.sort((a,b) => a.localeCompare(b,'zh-CN'));
     refreshCategorySelects();
     renderSettings();
     saveState();
@@ -1340,21 +1426,38 @@ function deleteAssetFromModal(){
 function renderCategoryManager(){
   const container = document.getElementById('categoryManager');
   if(!container) return;
-  container.innerHTML = categories.map(category => {
+  const renderCategory = category => {
     const count = assets.filter(a => a.category === category).length;
-    const protectedCategory = category === '其他';
+    const index = categories.indexOf(category);
     return `
       <div class="category-chip">
         <div class="category-chip-main">
           <strong>${esc(category)}</strong>
-          <small>${count} 件资产${protectedCategory ? ' · 默认分类' : ''}</small>
+          <small>${count} 件资产</small>
         </div>
-        ${protectedCategory
-          ? '<button class="category-delete" disabled style="opacity:.3;cursor:not-allowed" title="默认分类不能删除">×</button>'
-          : `<button class="category-delete" data-category="${esc(category)}" title="删除分类">×</button>`}
+        <div class="category-chip-actions">
+          <button class="category-move" type="button" data-category-move="${esc(category)}" data-direction="up" ${index === 0 ? 'disabled' : ''} title="上移">↑</button>
+          <button class="category-move" type="button" data-category-move="${esc(category)}" data-direction="down" ${index === categories.length - 1 ? 'disabled' : ''} title="下移">↓</button>
+          <button class="category-delete" type="button" data-category="${esc(category)}" title="删除分类">×</button>
+        </div>
       </div>
     `;
-  }).join('');
+  };
+  container.innerHTML = `
+    <div class="category-group">
+      <div class="category-group-title"><span>分类顺序</span><span>${categories.length} 个</span></div>
+      ${categories.length
+        ? `<div class="category-manager-grid">${categories.map(renderCategory).join('')}</div>`
+        : '<div class="category-empty">当前没有分类，添加资产时可以创建新的分类。</div>'}
+    </div>
+  `;
+}
+function openCategoryManager(){
+  renderCategoryManager();
+  document.getElementById('categoryModal').classList.add('show');
+}
+function closeCategoryManager(){
+  document.getElementById('categoryModal').classList.remove('show');
 }
 function addCategoryFromSettings(){
   const input = document.getElementById('settingsCategoryInput');
@@ -1368,31 +1471,46 @@ function addCategoryFromSettings(){
     return;
   }
   categories.push(value);
-  categories.sort((a,b)=>a.localeCompare(b,'zh-CN'));
   input.value = '';
   renderAll();
+  renderCategoryManager();
   toast('分类已新增');
 }
 function deleteCategory(category){
-  if(category === '其他'){
-    toast('“其他”是默认分类，不能删除');
+  const categoryIndex = categories.indexOf(category);
+  if(categoryIndex < 0) return;
+  const count = assets.filter(a => a.category === category).length;
+  if(categories.length === 1 && count > 0){
+    toast('该分类仍有资产，请先新增其他分类');
     return;
   }
-  const count = assets.filter(a => a.category === category).length;
+  const fallbackCategory = categories.find(item => item !== category) || '';
   const message = count
-    ? `“${category}”下有 ${count} 件资产。删除分类后，这些资产会自动转移到“其他”。`
+    ? `“${category}”下有 ${count} 件资产。删除分类后，这些资产会自动转移到“${fallbackCategory}”。`
     : `确定删除分类“${category}”吗？`;
   showConfirm({
     title:'删除分类',
     message,
     okText:'删除分类',
     onConfirm:() => {
-      assets = assets.map(a => a.category === category ? {...a, category:'其他', icon:guessIcon('其他')} : a);
+      if(fallbackCategory){
+        assets = assets.map(a => a.category === category
+          ? {...a, category:fallbackCategory, icon:guessIcon(fallbackCategory)}
+          : a);
+      }
       categories = categories.filter(c => c !== category);
       renderAll();
       toast('分类已删除');
     }
   });
+}
+function moveCategory(category, direction){
+  const index = categories.indexOf(category);
+  if(index < 0) return;
+  const nextIndex = direction === 'up' ? index - 1 : index + 1;
+  if(nextIndex < 0 || nextIndex >= categories.length) return;
+  [categories[index], categories[nextIndex]] = [categories[nextIndex], categories[index]];
+  renderAll();
 }
 function updateSetting(key, value){
   if(key === 'currency') return;
@@ -1408,9 +1526,13 @@ function renderSettings(){
   const assetCount = document.getElementById('settingsAssetCount');
   const categoryCount = document.getElementById('settingsCategoryCount');
   const amount = document.getElementById('settingsTotalAmount');
+  const categorySummary = document.getElementById('categorySummary');
   if(assetCount) assetCount.textContent = assets.length + ' 件';
   if(categoryCount) categoryCount.textContent = categories.length + ' 个';
   if(amount) amount.textContent = formatMoney(totalAmount());
+  if(categorySummary){
+    categorySummary.textContent = `${categories.length} 个分类 · 可新增、删除和排序`;
+  }
 
   const defaultSort = document.getElementById('defaultSortSetting');
   if(defaultSort) defaultSort.value = settings.defaultSort;
@@ -1527,10 +1649,13 @@ function normalizeBackupData(data){
     throw new Error('不是有效的物值备份');
   }
 
-  const normalizedCategories = [...new Set(
+  const backupCategories = [...new Set(
     data.categories.map(category => String(category ?? '').trim()).filter(Boolean)
   )];
-  if(!normalizedCategories.includes('其他')) normalizedCategories.push('其他');
+  const categoryMigration = findCategoryMigration(backupCategories);
+  const normalizedCategories = categoryMigration
+    ? [...DEFAULT_CATEGORIES]
+    : [...new Set([...DEFAULT_CATEGORIES, ...backupCategories])];
 
   const usedIds = new Set();
   let nextId = 1;
@@ -1538,7 +1663,10 @@ function normalizeBackupData(data){
     const name = String(raw?.name ?? '').trim();
     const price = Number(raw?.price);
     const purchaseDate = String(raw?.purchaseDate ?? '').trim();
-    const category = String(raw?.category ?? '其他').trim() || '其他';
+    const rawCategory = String(raw?.category ?? '其他').trim() || '其他';
+    const category = categoryMigration
+      ? (categoryMigration.map[rawCategory] || rawCategory)
+      : rawCategory;
     const validationError = validateAssetFields({name, price, purchaseDate, category});
     if(validationError) throw new Error(`第 ${index + 1} 件资产：${validationError}`);
     if(!normalizedCategories.includes(category)) normalizedCategories.push(category);
@@ -1683,6 +1811,11 @@ function bindDynamicEvents(){
   });
 
   document.getElementById('categoryManager')?.addEventListener('click', event => {
+    const moveButton = event.target.closest('[data-category-move]');
+    if(moveButton){
+      moveCategory(moveButton.dataset.categoryMove, moveButton.dataset.direction);
+      return;
+    }
     const button = event.target.closest('[data-category]');
     if(!button) return;
     deleteCategory(button.dataset.category);
